@@ -16,6 +16,7 @@ env:
 jobs:
   # ================= Windows：NSIS 安装包 + 便携包 =================
   windows:
+    if: github.event_name != 'workflow_dispatch'
     name: Windows (setup + portable)
     runs-on: windows-latest
     steps:
@@ -73,7 +74,7 @@ jobs:
 
   # ================= Android：按 ABI 分包 + 签名 =================
   android:
-    name: Android (split per ABI)
+    name: Android (arm64 APK)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -117,7 +118,7 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+          targets: aarch64-linux-android
       - uses: swatinem/rust-cache@v2
         with:
           workspaces: src-tauri -> target
@@ -129,7 +130,7 @@ jobs:
         run: pnpm tauri android init --ci
 
       - name: 编译 APK（按 ABI 分包）
-        run: pnpm tauri android build --apk --split-per-abi --target aarch64 armv7 x86_64
+        run: pnpm tauri android build --apk --split-per-abi --target aarch64
 
       - name: 签名 APK
         env:
@@ -172,6 +173,7 @@ jobs:
 
   # ================= macOS：Universal（Apple Silicon + Intel）dmg =================
   macos:
+    if: github.event_name != 'workflow_dispatch'
     name: macOS (universal dmg)
     runs-on: macos-latest
     steps:
